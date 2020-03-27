@@ -115,8 +115,8 @@ describe('array literals and tuple types', () => {
             expect(result.formattedName).toBe('Skywalker, Luke');
             expect(result.numberOfLetters).toBe(15);
 
-            const { formattedName: n } = formatName('Lando', 'Calrission');
-            expect(n).toBe('Calrission, Lando');
+            const { formattedName: n } = formatName('Lando', 'Calrissian');
+            expect(n).toBe('Calrissian, Lando');
         });
         it('the same thing with tuples', () => {
             function formatName2(first: string, last: string): [string, number] {
@@ -135,6 +135,101 @@ describe('array literals and tuple types', () => {
 
             expect(warren[2]).toBe(58);
         });
+    });
+});
+
+describe('object literals and interfaces', () => {
+    it('anonymous objects are defined by an interface', () => {
+        const thor = {
+            title: 'Thor Ragnorak',
+            director: 'Taika Waititi',
+            yearReleased: 2017
+        };
+        // thor.yearReleased = 2018 - mutable
+        const updatedThor = { ...thor, yearReleased: 2018 }; // immutable
+        expect(updatedThor.title).toBe('Thor Ragnorak');
+        expect(updatedThor.director).toBe('Taika Waititi');
+        expect(updatedThor.yearReleased).toBe(2018);
+        expect(thor.yearReleased).toBe(2017);
+    });
+    it('extensible objects', () => {
+        interface Book {
+            title: string;
+            author: string;
+            pages: number;
+            publisher?: string;
+            year: number | null;
+        }
+        const book: Book = {
+            title: 'Walden',
+            author: 'Thoreau',
+            pages: 219,
+            year: null
+        };
+        book.publisher = '';
+        // book.page = 300;
+        function doBookStuff(someBook: Book) {
+            const hasPublisher = !!someBook.publisher; // this will return if publisher is "truthy"
+            if (!hasPublisher) {
+                // don't count ont hat being there..
+            }
+        }
+    });
+    it('truth table', () => {
+        expect(undefined).toBeFalsy();
+        expect(null).toBeFalsy();
+        expect(0).toBeFalsy();
+        expect('').toBeFalsy();
+        expect(1).toBeTruthy();
+        expect(-1).toBeTruthy();
+        expect(NaN).toBeFalsy();
+        expect('penguin').toBeTruthy();
+    });
+});
+
+describe('structural typing (aka "duck typing")', () => {
+    it('an example', () => {
+        interface IHaveAMessage { message: string; }
+        function logItOut(thingy: IHaveAMessage) {
+            console.log(`At ${new Date().toISOString()}: ${thingy.message}`);
+        }
+        // logItOut();
+        // logItOut('tacos');
+        logItOut({ message: 'Hello' });
+        const phoneCall = {
+            from: 'Mom',
+            line: 'Home Phone',
+            message: 'Call your mom'
+        };
+        logItOut(phoneCall);
+    });
+});
+
+describe('enums and string unions', () => {
+    it('assigning seats', () => {
+        type SeatType = 'aisle' | 'window' | 'middle';
+        let mySeat: SeatType;
+        mySeat = (() => 'window' as SeatType)();
+        let price = 0;
+        switch (mySeat) {
+            case 'aisle': {
+                price = 100;
+                return;
+            }
+            case 'middle': {
+                price = 75;
+                return;
+            }
+            case 'window': {
+                price = 125;
+                return;
+            }
+        }
+        expect(price).toBe(125);
+        type FileType = 'xml' | 'json' | 'jsonp' | 'text';
+        const theFile: FileType = 'jsonp';
+        enum AccountType { Standard, Gold = 99, Platinum }
+        const myAcccount: AccountType = AccountType.Gold;
     });
 });
 
